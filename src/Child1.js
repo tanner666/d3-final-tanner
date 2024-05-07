@@ -5,60 +5,53 @@ import "./App.css"
 class Child1 extends Component{
   constructor(props){
     super(props);
-    this.state={
-        selected_numerical:"total_bill",
-        selected_radio:"sex",
-    };
+    this.state={};
   }
 
   //only called initially when component mounts
   componentDidMount(){
+    console.log(this.props.data1)
   }
 
   //called each time component is updated
   componentDidUpdate(){
     //numerical value, sex
-    const selected_numerical = this.state.selected_numerical
     var data=this.props.data1
-    let selected_radio = 'day';
-    console.log("Props: ", this.props.data1);
+
+     console.log("Props: ", this.props.data1);
+
+    //set the dimensions and margins of graph
+    var margin = {top:10, right:10, bottom:30,left:20},
+    w = 500 - margin.left - margin.right,
+    h = 300 - margin.top - margin.bottom;
+
+    var container = d3.select(".child1_svg")
+    .attr("width", w + margin.left + margin.right)
+    .attr("height", h + margin.top + margin.bottom)
+    .select(".g_1")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
     //group data
     const grouped = data.reduce((acc, item) => {
         //initialize the group if it doesn't already exist
-        if (!acc[item[selected_radio]]) {
-          acc[item[selected_radio]] = [];
+        if (!acc[item.category]) {
+          acc[item.category] = [];
         }
         //push the current items selected_numerical value to the group
-        acc[item[selected_radio]].push(parseFloat(item[selected_numerical]));
+        acc[item.category].push(parseFloat(item.x));
         return acc;
       }, {});
   
       //calculate the average for each group and return as dict with averages
-      const averages = Object.keys(grouped).map(key => {
-        const sum = grouped[key].reduce((sum, current) => sum + current, 0);
-        const average = sum / grouped[key].length;
-        return { [selected_radio]: key, average };
+      const sums = Object.keys(grouped).map(key => {
+        const sum = grouped[key].reduce((sum, current) => sum + 1, 0);
+        return { category: key, sum };
       });
 
-      console.log("Averages: ", averages)
-
-    // set the dimensions and margins of the graph
-    var margin = { top: 10, right: 10, bottom: 30, left: 20 },
-      w = 500 - margin.left - margin.right,
-      h = 300 - margin.top - margin.bottom;
-    
-     // Check the format of the data in the conosole
-
-    var container = d3
-      .select(".child1_svg")
-      .attr("width", w + margin.left + margin.right)
-      .attr("height", h + margin.top + margin.bottom)
-      .select(".g_1")
-      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+      console.log("sums: ", sums)
 
     // X axis
-    var x_data = averages.map((item) => item[selected_radio]);
+    var x_data = sums.map((item) => item.category);
     var x_scale = d3
       .scaleBand()
       .domain(x_data)
@@ -73,12 +66,20 @@ class Child1 extends Component{
       .attr("transform", `translate(0, ${h})`)
       .call(d3.axisBottom(x_scale));
 
-    console.log("averages: ", averages)
+    // Add X axis label
+    container.selectAll("text")
+    .data([0])
+    .join('text')
+    .attr('class','x-axis-label')
+    .attr('fill', 'black')
+    .attr("x", w / 4 )
+    .attr("y", 20)
+    .text("Categories")
 
     // Add Y axis
     var y_scale = d3
       .scaleLinear()
-      .domain([0, d3.max(averages, d => d.average)])
+      .domain([0, d3.max(sums, d => d.sum)])
       .range([h, 0]);
 
     container
@@ -89,37 +90,35 @@ class Child1 extends Component{
       .attr("transform", `translate(${margin.left},0)`)
       .call(d3.axisLeft(y_scale));
 
-    container
-      .selectAll("rect")
-      .data(averages)
-      .join("rect")
-      .attr("x", d => x_scale(d.day))
-      .attr("y", d => y_scale(d.average))
-      .attr("width", x_scale.bandwidth())
-      .attr("height", d =>  h - y_scale(d.average))
-      .attr("fill", "#69b3a2");
-  }
+    container.selectAll("rect")
+    .data(sums)
+    .join("rect")
+    .attr("x", d => x_scale(d.category))
+    .attr("y", d => y_scale(d.sum))
+    .attr("width", x_scale.bandwidth())
+    .attr("height", d =>  h - y_scale(d.sum)) 
+    .attr("fill", "#69b3a2");
 
-  //called when component is mounted, called before componentDidMount
-  render(){
+    container.selectAll("text.rect")
+        .data(sums)
+        .join("text")
+        .attr("class", "rect")
+        .attr("text-anchor", "middle")     // centers the text horizontally
+        .attr("x", d => x_scale(d.category) + x_scale.bandwidth() / 2)    // center text
+        .attr("y", d => y_scale(d.sum) + 20)    // adjust y position to be inside the bar
+        .text(d => d.sum)
+
+    console.log("Component did update", this.props.data1)
+    }
+
+    //called when component is mounted, called before componentDidMount
+    render(){
     return(
-        <div>
-            <div className="dropdown-container">
-                <div className="dropdown">
-                    <span className="dropdown-label">Select Target:</span>
-                    <select className="dropdown-select" onChange={(event)=>this.setState({selected_numerical:event.target.value})} value={this.state.selected_numerical}>
-                    {this.props.numericalColumns.map(column => (
-                        <option key={column} value={column}>{column}</option>
-                    ))}
-                    </select>
-                </div>
-            </div>
-            <svg className="child1_svg">
-                <g className="g_1"></g>
-            </svg>
-        </div>
+    <svg className="child1_svg">
+    <g className="g_1"></g>
+    </svg>
     )
-  }
-}
+    }
+    }
 
-export default Child1;
+    export default Child1;
