@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/d3-final-tanner/static/css/main.f855e6bc.css",
+    "main.js": "/d3-final-tanner/static/js/main.62748a06.js",
+    "static/js/453.1b305b47.chunk.js": "/d3-final-tanner/static/js/453.1b305b47.chunk.js",
+    "static/media/SampleDataset.csv": "/d3-final-tanner/static/media/SampleDataset.1a13c1758e940941af06.csv",
+    "index.html": "/d3-final-tanner/index.html",
+    "main.f855e6bc.css.map": "/d3-final-tanner/static/css/main.f855e6bc.css.map",
+    "main.62748a06.js.map": "/d3-final-tanner/static/js/main.62748a06.js.map",
+    "453.1b305b47.chunk.js.map": "/d3-final-tanner/static/js/453.1b305b47.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f855e6bc.css",
+    "static/js/main.62748a06.js"
+  ]
+}
